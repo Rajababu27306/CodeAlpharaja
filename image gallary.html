@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Image Gallery</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:aqua;
+    min-height:100vh;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+    color:white;
+    margin-bottom:20px;
+    font-size:40px;
+}
+
+.filters{
+    text-align:center;
+    margin-bottom:25px;
+}
+
+.filters button{
+    padding:12px 20px;
+    margin:5px;
+    border:none;
+    border-radius:30px;
+    background:rgba(255,255,255,0.2);
+    color:white;
+    backdrop-filter:blur(10px);
+    cursor:pointer;
+    transition:.4s;
+}
+
+.filters button:hover{
+    background:white;
+    color:#764ba2;
+    transform:translateY(-3px);
+}
+
+.gallery{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;
+}
+
+.card{
+    overflow:hidden;
+    border-radius:20px;
+    position:relative;
+    cursor:pointer;
+    transition:.5s;
+}
+
+.card img{
+    width:100%;
+    height:250px;
+    object-fit:cover;
+    transition:.6s;
+}
+
+.card:hover img{
+    transform:scale(1.15);
+}
+
+.overlay{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+    font-size:24px;
+    opacity:0;
+    transition:.4s;
+}
+
+.card:hover .overlay{
+    opacity:1;
+}
+
+/* Lightbox */
+
+.lightbox{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.95);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+    animation:fade .4s;
+}
+
+.lightbox img{
+    width:80%;
+    max-width:850px;
+    border-radius:15px;
+    animation:zoom .4s;
+}
+
+.close,
+.prev,
+.next{
+    position:absolute;
+    color:white;
+    font-size:40px;
+    cursor:pointer;
+    user-select:none;
+}
+
+.close{
+    top:20px;
+    right:35px;
+}
+
+.prev{
+    left:30px;
+}
+
+.next{
+    right:30px;
+}
+
+@keyframes zoom{
+    from{transform:scale(.6);}
+    to{transform:scale(1);}
+}
+
+@keyframes fade{
+    from{opacity:0;}
+    to{opacity:1;}
+}
+
+@media(max-width:768px){
+    .lightbox img{
+        width:95%;
+    }
+
+    h1{
+        font-size:28px;
+    }
+}
+</style>
+</head>
+<body>
+
+<h1>✨ Interactive Image Gallery</h1>
+
+<div class="filters">
+    <button onclick="filterGallery('all')">All</button>
+    <button onclick="filterGallery('nature')">Nature</button>
+    <button onclick="filterGallery('city')">City</button>
+    <button onclick="filterGallery('animals')">Animals</button>
+</div>
+
+<div class="gallery">
+
+<div class="card nature">
+<img src="https://picsum.photos/id/1015/600/400">
+<div class="overlay">Nature</div>
+</div>
+
+<div class="card city">
+<img src="https://picsum.photos/id/1011/600/400">
+<div class="overlay">City</div>
+</div>
+
+<div class="card animals">
+<img src="https://picsum.photos/id/1025/600/400">
+<div class="overlay">Animal</div>
+</div>
+
+<div class="card nature">
+<img src="https://picsum.photos/id/1039/600/400">
+<div class="overlay">Nature</div>
+</div>
+
+<div class="card city">
+<img src="https://picsum.photos/id/1043/600/400">
+<div class="overlay">City</div>
+</div>
+
+<div class="card animals">
+<img src="https://picsum.photos/id/237/600/400">
+<div class="overlay">Animal</div>
+</div>
+
+</div>
+
+<!-- Lightbox -->
+
+<div class="lightbox" id="lightbox">
+<span class="close">&times;</span>
+<span class="prev">&#10094;</span>
+<img id="lightboxImg">
+<span class="next">&#10095;</span>
+</div>
+
+<script>
+
+const cards = document.querySelectorAll('.card');
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+
+let current = 0;
+
+cards.forEach((card,index)=>{
+    card.addEventListener('click',()=>{
+        current=index;
+        showImage();
+        lightbox.style.display='flex';
+    });
+});
+
+function showImage(){
+    lightboxImg.src=
+    cards[current].querySelector('img').src;
+}
+
+document.querySelector('.close')
+.addEventListener('click',()=>{
+    lightbox.style.display='none';
+});
+
+document.querySelector('.next')
+.addEventListener('click',()=>{
+    current=(current+1)%cards.length;
+    showImage();
+});
+
+document.querySelector('.prev')
+.addEventListener('click',()=>{
+    current=(current-1+cards.length)%cards.length;
+    showImage();
+});
+
+function filterGallery(category){
+
+cards.forEach(card=>{
+
+if(category==='all' ||
+card.classList.contains(category))
+{
+card.style.display='block';
+}
+else{
+card.style.display='none';
+}
+
+});
+
+}
+
+/* Keyboard Navigation */
+
+document.addEventListener('keydown',(e)=>{
+
+if(lightbox.style.display==='flex'){
+
+if(e.key==='ArrowRight'){
+current=(current+1)%cards.length;
+showImage();
+}
+
+if(e.key==='ArrowLeft'){
+current=(current-1+cards.length)%cards.length;
+showImage();
+}
+
+if(e.key==='Escape'){
+lightbox.style.display='none';
+}
+
+}
+
+});
+
+</script>
+
+</body>
+</html>
